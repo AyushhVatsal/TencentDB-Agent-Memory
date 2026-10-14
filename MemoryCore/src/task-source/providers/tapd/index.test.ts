@@ -84,7 +84,19 @@ describe("TAPD listCandidates pagination", () => {
       page: 2,
       limit: 2,
     });
+    const thirdPage = await tapdProvider.listCandidates(ctx, {
+      scope: "123",
+      itemTypes: ["story", "task", "bug"],
+      page: 3,
+      limit: 2,
+    });
 
+    const fifthPage = await tapdProvider.listCandidates(ctx, {
+      scope: "123",
+      itemTypes: ["story", "task", "bug"],
+      page: 5,
+      limit: 2,
+    });
     expect(firstPage.items.map((item) => item.externalId)).toEqual([
       "story-1",
       "story-2",
@@ -94,5 +106,16 @@ describe("TAPD listCandidates pagination", () => {
       "task-1",
       "task-2",
     ]);
+    expect(thirdPage.items.map((item) => item.externalId)).toEqual([
+      "task-3",
+      "task-4",
+    ]);
+
+    expect(fifthPage.items.map((item) => item.externalId)).toEqual([
+      "bug-3",
+      "bug-4",
+    ]);
+
+    expect(fifthPage.hasMore).toBe(false);
   });
 });
