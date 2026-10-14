@@ -168,7 +168,7 @@ export const tapdProvider: TaskSourceProvider = {
     // 各类型并发拉取后合并：TAPD 没有跨类型统一列表接口。
     const perType = await Promise.all(
       types.map(async (itemType) => {
-        const args: Record<string, unknown> = { workspace_id: q.scope, limit, page };
+        const args: Record<string, unknown> = { workspace_id: q.scope, limit: page * limit, page: 1 };
         if (q.keyword) args[keywordField(itemType)] = q.keyword;
         // 处理人字段名按类型区分：bug 是 current_owner，story/task 是 owner。
         // 用错会触发服务端「参数X不存在于工具Y的参数定义中」错误文本。
@@ -201,7 +201,8 @@ export const tapdProvider: TaskSourceProvider = {
     // 各类型并发拉取时，每类各返回 limit 条，合并后最多 limit × 类型数 ——
     // 若直接返回会让前端一页显示远超 PAGE_SIZE 的行（表现为「一页显示了所有」），
     // 故合并后统一截断到 limit，保持与单页大小一致。
-    const paged = items.slice(0, limit);
+    const start = (page - 1) * limit;
+    const paged = items.slice(start, start + limit);
     const total = perType.reduce((sum, t) => sum + t.total, 0);
     return { items: paged, total, hasMore: page * limit < total };
   },
